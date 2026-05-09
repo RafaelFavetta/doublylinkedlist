@@ -22,9 +22,13 @@ public:
         Node *node = new Node(value);
         if (!head) {
             head = tail = node;
+            head->next = head;
+            head->prev = head;
         } else {
             tail->next = node;
             node->prev = tail;
+            node->next = head;
+            head->prev = node;
             tail = node;
         }
         size++;
@@ -34,9 +38,13 @@ public:
         Node *node = new Node(value);
         if (!head) {
             head = tail = node;
+            head->next = head;
+            head->prev = head;
         } else {
             node->next = head;
             head->prev = node;
+            node->prev = tail;
+            tail->next = node;
             head = node;
         }
         size++;
@@ -48,9 +56,12 @@ public:
             return;
         }
         cout << "Front -> Back: ";
-        for (Node *n = head; n; n = n->next)
+        Node *n = head;
+        for (int i = 0; i < size; i++) {
             cout << n->data << " <-> ";
-        cout << "null\n";
+            n = n->next;
+        }
+        cout << "(back to head)\n";
     }
 
     void print_backward() {
@@ -59,16 +70,26 @@ public:
             return;
         }
         cout << "Back -> Front: ";
-        for (Node *n = tail; n; n = n->prev)
+        Node *n = tail;
+        for (int i = 0; i < size; i++) {
             cout << n->data << " <-> ";
-        cout << "null\n";
+            n = n->prev;
+        }
+        cout << "(back to tail)\n";
     }
 
     ~DoublyLinkedList() {
-        while (head) {
+        while (size > 0) {
             Node *temp = head;
-            head = head->next;
+            if (size == 1) {
+                head = tail = nullptr;
+            } else {
+                head = head->next;
+                head->prev = tail;
+                tail->next = head;
+            }
             delete temp;
+            size--;
         }
     }
 
@@ -82,7 +103,8 @@ public:
             head = tail = nullptr;
         } else {
             head = head->next;
-            head->prev = nullptr;
+            head->prev = tail;
+            tail->next = head;
         }
         delete temp;
         size--;
@@ -99,7 +121,8 @@ public:
             head = tail = nullptr;
         } else {
             tail = tail->prev;
-            tail->next = nullptr;
+            tail->next = head;
+            head->prev = tail;
         }
         delete temp;
         size--;
@@ -109,10 +132,6 @@ public:
     void insert_at(int index, T value) {
         if (index < 0 || index > size) {
             cout << "Index out of bounds!\n";
-            return;
-        }
-        if (index == 0) {
-            push_front(value);
             return;
         }
         if (index == 0) {
@@ -160,15 +179,17 @@ public:
     }
 
     bool search(T value) {
+        if (!head) {
+            cout << "Not found!\n";
+            return false;
+        }
         Node *current = head;
-        int position = 0;
-        while (current) {
+        for (int position = 0; position < size; position++) {
             if (current->data == value) {
                 cout << "Found at position " << position << "\n";
                 return true;
             }
             current = current->next;
-            position++;
         }
         cout << "Not found!\n";
         return false;
@@ -267,6 +288,7 @@ int main() {
     }
     return 0;
 }
+
 // inserir no inicio
 // inserir no final
 // inserir em posicao especifica
